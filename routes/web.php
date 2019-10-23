@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,5 +13,27 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('phonebook');
+});
+Route::get('/contacts', function (Request $request) {
+    $contacts = App\Contact::query();
+    if($request->search) {
+        $searchWords = str_split($request->search);
+        foreach($searchWords as $word){
+            $contacts->where('name', 'LIKE', '%'.$word.'%');
+        }
+    }
+    $count = $contacts->get()->count();
+
+    $contacts = $contacts
+    ->orderBy('name','ASC')
+    ->distinct()
+    ->skip(0)
+    ->take(3)
+    ->get();
+    return response()->json([
+        "totalCount" => $count,
+        "Contacts" => $contacts,
+        "searchWords" => $searchWords
+    ]);
 });
