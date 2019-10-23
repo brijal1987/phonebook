@@ -16,21 +16,23 @@ Route::get('/', function () {
     return view('phonebook');
 });
 Route::get('/contacts', function (Request $request) {
-    $contacts = App\Contact::query();
-    if($request->search) {
+    $count = 0;
+    $searchWords = $contacts = [];
+    if(isset($request->search)) {
+        $contacts = App\Contact::query();
         $searchWords = str_split($request->search);
         foreach($searchWords as $word){
             $contacts->where('name', 'LIKE', '%'.$word.'%');
         }
-    }
-    $count = $contacts->get()->count();
+        $count = $contacts->get()->count();
 
-    $contacts = $contacts
-    ->orderBy('name','ASC')
-    ->distinct()
-    ->skip(0)
-    ->take(3)
-    ->get();
+        $contacts = $contacts
+        ->orderBy('name','ASC')
+        ->distinct()
+        ->skip(0)
+        ->take(3)
+        ->get();
+    }
     return response()->json([
         "totalCount" => $count,
         "Contacts" => $contacts,
